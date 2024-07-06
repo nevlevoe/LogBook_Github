@@ -1,11 +1,43 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'login.dart';
+import 'passwordreset.dart';
+import 'overlaypasswordreset.dart';
+import 'menu.dart'; // Import the HomepageindexWidget file
+import 'homepage.dart'; // Import the Homepage file
+import 'profile.dart'; // Import the ProfileWidget file
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: LandingPageWidget(),
-  ));
+void main() async {
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: LandingPageWidget(),
+      routes: {
+        '/login': (context) => LoginWidget(),
+        '/passwordreset': (context) => PasswordresetWidget(),
+        '/overlaypasswordreset': (context) => Frame2610316Widget(),
+        '/homepageindex': (context) => HomepageindexWidget(),
+        '/homepage': (context) => HomepageWidget(),
+        '/menu': (context) => HomepageindexWidget(),
+        '/profile': (context) => ProfileWidget(), // Add this route
+      },
+    );
+  }
 }
 
 class LandingPageWidget extends StatefulWidget {
@@ -20,9 +52,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
     // Start a timer for 3 seconds
     Timer(const Duration(seconds: 3), () {
       // Navigate to Login Page after 3 seconds
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (context) => LoginWidget(),
-      ));
+      Navigator.of(context).pushReplacementNamed('/login');
     });
   }
 
@@ -49,14 +79,14 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
               width: 150,
               height: 153,
               decoration: const BoxDecoration(
-                image:  DecorationImage(
-                  image:  AssetImage('assets/bmslogo.png'),
+                image: DecorationImage(
+                  image: AssetImage('assets/bmslogo.png'),
                   fit: BoxFit.fill,
                 ),
               ),
             ),
-             const SizedBox(height: 0),
-             const Text(
+            const SizedBox(height: 0),
+            const Text(
               'LogBook',
               textAlign: TextAlign.center,
               style: TextStyle(
