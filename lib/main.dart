@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'login_student.dart';
+import 'login_option.dart';
 import 'login.dart';
 import 'passwordreset.dart';
 import 'overlaypasswordreset.dart';
@@ -29,6 +31,8 @@ class MyApp extends StatelessWidget {
       home: LandingPageWidget(),
       routes: {
         '/login': (context) => LoginWidget(),
+        '/login_student': (context) => StudentLoginWidget(),
+        '/login_option': (context) => TeacherStudentLoginWidget(),
         '/passwordreset': (context) => PasswordresetWidget(),
         '/overlaypasswordreset': (context) => Frame2610316Widget(),
         '/homepageindex': (context) => HomepageindexWidget(),
@@ -52,7 +56,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
     // Start a timer for 3 seconds
     Timer(const Duration(seconds: 3), () {
       // Navigate to Login Page after 3 seconds
-      Navigator.of(context).pushReplacementNamed('/login');
+      Navigator.of(context).pushReplacementNamed('/login_option');
     });
   }
 

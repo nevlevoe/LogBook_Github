@@ -1,48 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Add this import
 import 'passwordreset.dart';  // Import the PasswordReset screen
 import 'homepage.dart';  // Import the Homepage screen
 
-class LoginWidget extends StatefulWidget {
+class StudentLoginWidget extends StatefulWidget {
   @override
-  _LoginWidgetState createState() => _LoginWidgetState();
+  _StudentLoginWidgetState createState() => _StudentLoginWidgetState();
 }
 
-class _LoginWidgetState extends State<LoginWidget> {
+class _StudentLoginWidgetState extends State<StudentLoginWidget> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // Add this line
 
   void _login() async {
     try {
-      // Get the Firestore instance
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-      // Query the login_teacher collection for the entered email
-      QuerySnapshot snapshot = await firestore
-          .collection('login_teacher')
-          .where('TeacherLogin', isEqualTo: _emailController.text)
-          .where('TeacherPassword', isEqualTo: _passwordController.text)
+      // Retrieve the user's email and password from the Firestore collection
+      final QuerySnapshot result = await _firestore
+          .collection('login_student')
+          .where('StudentEmail', isEqualTo: _emailController.text)
+          .where('Password', isEqualTo: _passwordController.text)
           .get();
 
-      if (snapshot.docs.isNotEmpty) {
-        // If a match is found, navigate to the Homepage
+      final List<DocumentSnapshot> documents = result.docs;
+
+      if (documents.length == 1) {
+        // Credentials are correct, navigate to the homepage
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => HomepageWidget()),
         );
       } else {
-        // If no match is found, show an error message
+        // Show error message if credentials are incorrect
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Wrong username or password')),
+          SnackBar(content: Text('Invalid email or password')),
         );
       }
     } catch (e) {
+      // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(content: Text('Error logging in: $e')),
       );
     }
   }
@@ -56,9 +57,6 @@ class _LoginWidgetState extends State<LoginWidget> {
 
   Future<void> _signInWithGoogle() async {
     try {
-      final GoogleSignIn _googleSignIn = GoogleSignIn(
-        clientId: '546715749052-surimq7lh7f4k2t54ijum88vt8gf5jh3.apps.googleusercontent.com',  // Replace with your actual client ID
-      );
       final GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
       if (googleSignInAccount != null) {
         final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
@@ -78,7 +76,6 @@ class _LoginWidgetState extends State<LoginWidget> {
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +111,7 @@ class _LoginWidgetState extends State<LoginWidget> {
               right: 0,
               child: Center(
                 child: Text(
-                  "TEACHER'S LOGIN",
+                  "STUDENT'S LOGIN",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Color.fromRGBO(53, 114, 239, 1),
