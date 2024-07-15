@@ -13,29 +13,33 @@ class LoginWidget extends StatefulWidget {
 class _LoginWidgetState extends State<LoginWidget> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _teacheridController = TextEditingController();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   void _login() async {
     try {
-      // Get the Firestore instance
       FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-      // Query the login_teacher collection for the entered email
+      // Query the Teacher collection for the entered email and password
       QuerySnapshot snapshot = await firestore
-          .collection('login_teacher')
-          .where('TeacherLogin', isEqualTo: _emailController.text)
-          .where('TeacherPassword', isEqualTo: _passwordController.text)
+          .collection('Teacher')
+          .where('CollegeEmail', isEqualTo: _emailController.text)
+          .where('Password', isEqualTo: _passwordController.text)
           .get();
 
       if (snapshot.docs.isNotEmpty) {
-        // If a match is found, navigate to the Homepage
+        // Fetch the TeacherID from the document
+        String teacherId = snapshot.docs.first.get('TeacherID');
+        _teacheridController.text = teacherId;
+
+        // Navigate to the Homepage
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => HomepageWidget()),
+          MaterialPageRoute(builder: (context) => HomepageWidget(teacherid: _teacheridController.text)),
         );
       } else {
-        // If no match is found, show an error message
+        // Show an error message if no match is found
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Wrong username or password')),
         );
@@ -67,10 +71,24 @@ class _LoginWidgetState extends State<LoginWidget> {
           accessToken: googleSignInAuthentication.accessToken,
         );
         await _firebaseAuth.signInWithCredential(credential);
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => HomepageWidget()),
-        );
+
+        // Fetch the TeacherID from Firestore
+        FirebaseFirestore firestore = FirebaseFirestore.instance;
+        QuerySnapshot snapshot = await firestore
+            .collection('Teacher')
+            .where('CollegeEmail', isEqualTo: _emailController.text)
+            .get();
+
+        if (snapshot.docs.isNotEmpty) {
+          String teacherId = snapshot.docs.first.get('TeacherID');
+          _teacheridController.text = teacherId;
+
+          // Navigate to the Homepage
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => HomepageWidget(teacherid: _teacheridController.text)),
+          );
+        }
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -78,7 +96,6 @@ class _LoginWidgetState extends State<LoginWidget> {
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

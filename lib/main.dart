@@ -8,6 +8,7 @@ import 'overlaypasswordreset.dart';
 import 'menu.dart'; // Import the HomepageindexWidget file
 import 'homepage.dart'; // Import the Homepage file
 import 'profile.dart'; // Import the ProfileWidget file
+import 'homepage_student.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -36,9 +37,11 @@ class MyApp extends StatelessWidget {
         '/passwordreset': (context) => PasswordresetWidget(),
         '/overlaypasswordreset': (context) => Frame2610316Widget(),
         '/homepageindex': (context) => HomepageindexWidget(),
-        '/homepage': (context) => HomepageWidget(),
+        '/homepage': (context) => HomepageWidget(teacherid: '_teacheridController.text'),
         '/menu': (context) => HomepageindexWidget(),
         '/profile': (context) => ProfileWidget(), // Add this route
+        '/homepage_student': (context) => StudenthomepageWidget() // Add this route
+
       },
     );
   }

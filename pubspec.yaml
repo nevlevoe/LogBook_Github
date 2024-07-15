@@ -38,6 +38,11 @@ dependencies:
   cupertino_icons: ^1.0.6
   firebase_core: ^3.1.1
   cloud_firestore: ^5.0.2
+  provider: ^6.0.2
+  excel: ^2.0.4
+  path_provider: ^2.0.11
+  syncfusion_flutter_xlsio: ^26.1.40
+
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +68,10 @@ flutter:
   assets:
     - assets/
     - assets/rectangle_attendance.svg
+    - assets/school.png
+    - assets/edit_square.png
+    - assets/how_to_reg.png
+    - assets/preview.png
   fonts:
     - family: DM Sans
       fonts:

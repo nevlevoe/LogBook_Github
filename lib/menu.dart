@@ -12,7 +12,7 @@ class _HomepageindexWidgetState extends State<HomepageindexWidget> {
     setState(() {
       _activeButton = routeName;
     });
-    Navigator.of(context).pushNamed(routeName).then((_) {
+    Navigator.of(context).pushReplacementNamed(routeName).then((_) {
       // Optionally reset the active button state when returning from a route
       setState(() {
         _activeButton = '';
@@ -110,6 +110,7 @@ class _HomepageindexWidgetState extends State<HomepageindexWidget> {
                               'Calendar of Events',
                               '/calendarofevents',
                               _activeButton == '/calendarofevents',
+
                             ),
                             _buildMenuLink(
                               context,

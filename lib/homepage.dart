@@ -1,17 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'dart:ui';  // Import for BackdropFilter
-
-import 'menu.dart';  // Make sure to import your HomepageindexWidget
-import 'classoptions.dart';  // Make sure to import your ClassOptions widget
+import 'dart:ui'; // Import for BackdropFilter
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'menu.dart'; // Make sure to import your HomepageindexWidget
+import 'classoptions.dart'; // Make sure to import your ClassOptions widget
+import 'dart:math'; // Import for randomizing colors
 
 class HomepageWidget extends StatefulWidget {
+  final String teacherid;
+
+  HomepageWidget({required this.teacherid});
+
   @override
   _HomepageWidgetState createState() => _HomepageWidgetState();
 }
 
 class _HomepageWidgetState extends State<HomepageWidget> {
   bool _showDialog = false;
+  final TextEditingController _semController = TextEditingController();
+  final TextEditingController _sectionController = TextEditingController();
+  final TextEditingController _teacheridController = TextEditingController();
+  final TextEditingController _subjectidclassesController = TextEditingController();
+  final TextEditingController _subjectidsubjectdetailsController = TextEditingController();
+  final TextEditingController _subjectnameController = TextEditingController();
+  final TextEditingController _classidController = TextEditingController();
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
+  List<Map<String, String>> classDetails = [];
+  final List<Color> colors = [Color.fromRGBO(87, 222, 23, 1), Colors.yellow, Colors.pinkAccent, Colors.red, Colors.deepOrangeAccent]; // List of colors
 
   void _openMenu() {
     setState(() {
@@ -33,6 +49,46 @@ class _HomepageWidgetState extends State<HomepageWidget> {
     });
   }
 
+  Future<void> _fetchHomepageData() async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      print(widget.teacherid);
+      QuerySnapshot classesSnapshot = await firestore
+          .collection('Classes')
+          .where('TeacherID', isEqualTo: widget.teacherid)
+          .get();
+
+      for (var classDoc in classesSnapshot.docs) {
+        QuerySnapshot subjectSnapshot = await firestore
+            .collection('SubjectDetails')
+            .where('SubjectID', isEqualTo: classDoc['SubjectID'])
+            .get();
+
+        for (var subjectDoc in subjectSnapshot.docs) {
+          classDetails.add({
+            'ClassId': classDoc['ClassID'],
+            'Semester': classDoc['Semester'],
+            'Section': classDoc['Section'],
+            'SubjectID': classDoc['SubjectID'],
+            'SubjectName': subjectDoc['SubjectName'],
+          });
+        }
+      }
+
+      setState(() {});
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (classDetails.isEmpty) {
+      _fetchHomepageData();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -40,6 +96,7 @@ class _HomepageWidgetState extends State<HomepageWidget> {
     double containerSpacing = 20;
     double totalContainerWidth = containerWidth * 2 + containerSpacing;
     double leftMargin = (screenWidth - totalContainerWidth) / 2;
+    Random random = Random();
 
     return Scaffold(
       body: Stack(
@@ -76,7 +133,7 @@ class _HomepageWidgetState extends State<HomepageWidget> {
                             fontFamily: 'DM Sans',
                             fontSize: 20,
                             letterSpacing: 0,
-                            fontWeight: FontWeight.normal,
+                            fontWeight: FontWeight.bold, // Bold text
                             height: 1.3,
                           ),
                         ),
@@ -90,7 +147,7 @@ class _HomepageWidgetState extends State<HomepageWidget> {
                   right: 0,
                   child: Center(
                     child: Container(
-                      width: 200,
+                      width: 250, // Increased width to accommodate image
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
@@ -100,21 +157,22 @@ class _HomepageWidgetState extends State<HomepageWidget> {
                             decoration: BoxDecoration(
                               color: Color.fromRGBO(255, 255, 255, 1),
                             ),
-                            child: SvgPicture.asset(
-                              'assets/images/vector.svg',
-                              semanticsLabel: 'vector',
+                            child: Image.asset(
+                              'assets/school.png',
+                              width: 24,
+                              height: 24,
                             ),
                           ),
                           SizedBox(width: 10),
                           Text(
-                            'Today’s classes',
+                            'Your classes',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Color.fromRGBO(0, 0, 0, 1),
                               fontFamily: 'DM Sans',
-                              fontSize: 15,
+                              fontSize: 18, // Increased font size
                               letterSpacing: 0,
-                              fontWeight: FontWeight.normal,
+                              fontWeight: FontWeight.bold, // Bold text
                               height: 1.7,
                             ),
                           ),
@@ -124,153 +182,83 @@ class _HomepageWidgetState extends State<HomepageWidget> {
                   ),
                 ),
                 Positioned(
-                  bottom: 20,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color.fromRGBO(0, 0, 0, 0.25),
-                            offset: Offset(0, 4),
-                            blurRadius: 4,
-                          ),
-                        ],
-                        color: Color.fromRGBO(53, 114, 239, 1),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      child: Text(
-                        '+ ADD CLASS',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color.fromRGBO(255, 255, 255, 1),
-                          fontFamily: 'DM Sans',
-                          fontSize: 20,
-                          letterSpacing: 0,
-                          fontWeight: FontWeight.normal,
-                          height: 1.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
                   top: 141,
                   left: leftMargin,
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ClassaWidget()),  // Navigate to ClassOptions widget
-                      );
-                    },
-                    child: Container(
-                      width: containerWidth,
-                      height: containerWidth,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color.fromRGBO(0, 0, 0, 0.25),
-                            offset: Offset(0, 4),
-                            blurRadius: 4,
-                          ),
-                        ],
-                        color: Color.fromRGBO(255, 153, 0, 0.67),
-                      ),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              '4C',
-                              style: TextStyle(
-                                color: Color.fromRGBO(255, 255, 255, 0.83),
-                                fontFamily: 'DM Serif Text',
-                                fontSize: 48,
-                                fontWeight: FontWeight.normal,
+                  right: leftMargin,
+                  child: Center(
+                    child: Wrap(
+                      spacing: containerSpacing,
+                      runSpacing: containerSpacing,
+                      children: classDetails.map((classDetail) {
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ClassaWidget(
+                                  classId: classDetail['ClassId']!,
+                                  teacherId: widget.teacherid,
+                                  subjectId: classDetail['SubjectID']!,
+                                  semester: classDetail['Semester']!,
+                                  section: classDetail['Section']!,
+                                  subject: classDetail['SubjectName']!,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: containerWidth,
+                            height: containerWidth,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color.fromRGBO(0, 0, 0, 0.25),
+                                  offset: Offset(0, 4),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                              color: colors[random.nextInt(colors.length)], // Random color
+                            ),
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Text(
+                                    classDetail['Semester'] ?? '',
+                                    style: TextStyle(
+                                      color: Color.fromRGBO(255, 255, 255, 0.83),
+                                      fontFamily: 'DM Serif Text',
+                                      fontSize: 48,
+                                      fontWeight: FontWeight.bold, // Bold text
+                                    ),
+                                  ),
+                                  SizedBox(height: 5),
+                                  Text(
+                                    classDetail['Section'] ?? '',
+                                    style: TextStyle(
+                                      color: Color.fromRGBO(255, 255, 255, 1),
+                                      fontFamily: 'DM Sans',
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold, // Bold text
+                                    ),
+                                  ),
+                                  SizedBox(height: 5),
+                                  Text(
+                                    classDetail['SubjectName'] ?? '',
+                                    style: TextStyle(
+                                      color: Color.fromRGBO(255, 255, 255, 1),
+                                      fontFamily: 'DM Sans',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold, // Bold text
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            SizedBox(height: 5),
-                            Text(
-                              '9:50-10:45',
-                              style: TextStyle(
-                                color: Color.fromRGBO(255, 255, 255, 1),
-                                fontFamily: 'DM Sans',
-                                fontSize: 15,
-                                fontWeight: FontWeight.normal,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'Cryptography',
-                              style: TextStyle(
-                                color: Color.fromRGBO(255, 255, 255, 1),
-                                fontFamily: 'DM Sans',
-                                fontSize: 16,
-                                fontWeight: FontWeight.normal,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 141,
-                  left: leftMargin + containerWidth + containerSpacing,
-                  child: Container(
-                    width: containerWidth,
-                    height: containerWidth,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color.fromRGBO(0, 0, 0, 0.25),
-                          offset: Offset(0, 4),
-                          blurRadius: 4,
-                        ),
-                      ],
-                      color: Color.fromRGBO(87, 222, 23, 1),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            '4B',
-                            style: TextStyle(
-                              color: Color.fromRGBO(255, 255, 255, 0.83),
-                              fontFamily: 'DM Serif Text',
-                              fontSize: 48,
-                              fontWeight: FontWeight.normal,
-                            ),
                           ),
-                          SizedBox(height: 5),
-                          Text(
-                            '12:10-1:05',
-                            style: TextStyle(
-                              color: Color.fromRGBO(255, 255, 255, 0.92),
-                              fontFamily: 'DM Sans',
-                              fontSize: 15,
-                              fontWeight: FontWeight.normal,
-                            ),
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            'Cryptography',
-                            style: TextStyle(
-                              color: Color.fromRGBO(255, 255, 255, 0.85),
-                              fontFamily: 'DM Sans',
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal,
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      }).toList(),
                     ),
                   ),
                 ),

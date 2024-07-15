@@ -1,23 +1,117 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import 'dart:ui';
-import 'package:flutter_svg/flutter_svg.dart';
-
-import 'menu.dart'; // Import the MenuPage
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:excel/excel.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class ClassViewAttendanceWidget extends StatefulWidget {
+  final String classId;
+  final String teacherId;
+  final String subjectId;
+
+  ClassViewAttendanceWidget({
+    required this.classId,
+    required this.teacherId,
+    required this.subjectId,
+  });
+
   @override
-  _ClassViewAttendanceWidgetState createState() =>
-      _ClassViewAttendanceWidgetState();
+  _ClassViewAttendanceWidgetState createState() => _ClassViewAttendanceWidgetState();
 }
 
 class _ClassViewAttendanceWidgetState extends State<ClassViewAttendanceWidget> {
-  bool isMenuOpen = false;
+  List<Map<String, dynamic>> studentData = [];
+  bool isLoading = true;
 
-  void toggleMenu() {
-    setState(() {
-      isMenuOpen = !isMenuOpen;
-    });
+  @override
+  void initState() {
+    super.initState();
+    fetchStudentData();
+  }
+
+  Future<void> fetchStudentData() async {
+    try {
+      print('Fetching attendance data...');
+
+      final QuerySnapshot attendanceSnapshot = await FirebaseFirestore.instance
+          .collection('SubjectAttendance')
+          .where('ClassID', isEqualTo: widget.classId)
+          .where('SubjectID', isEqualTo: widget.subjectId)
+          .where('TeacherID', isEqualTo: widget.teacherId)
+          .get();
+
+      print('Attendance data fetched: ${attendanceSnapshot.docs.length} records found.');
+
+      List<Map<String, dynamic>> fetchedData = [];
+
+      for (var doc in attendanceSnapshot.docs) {
+        Map<String, dynamic> attendanceData = doc.data() as Map<String, dynamic>;
+        print('Processing attendance record for StudentID: ${attendanceData['StudentID']}');
+        String studentId = doc['StudentID'];
+
+        DocumentSnapshot studentSnapshot = await FirebaseFirestore.instance
+            .collection('Student')
+            .where('StudentUSN', isEqualTo: studentId)
+            .get()
+            .then((snapshot) => snapshot.docs.first);
+
+        if (studentSnapshot.exists) {
+          Map<String, dynamic> studentData = studentSnapshot.data() as Map<String, dynamic>;
+          print('Student found: ${studentData['Fname']}');
+
+          fetchedData.add({
+            'StudentName': studentData['Fname'],
+            'StudentID': attendanceData['StudentID'],
+            'Eligibility': attendanceData['Eligibility'],
+            'AttendancePercentage': attendanceData['AttendancePercentage'],
+          });
+        } else {
+          print('StudentID: ${attendanceData['StudentID']} does not exist.');
+        }
+      }
+
+      print('Fetched student data: $fetchedData');
+
+      setState(() {
+        studentData = fetchedData;
+        isLoading = false;
+      });
+      print('State updated with student data.');
+
+    } catch (e) {
+      print('Error fetching data: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> exportToExcel() async {
+    var excel = Excel.createExcel();
+    Sheet sheetObject = excel['Sheet1'];
+
+    // Add column headers
+    sheetObject.appendRow(['Student Name', 'Student ID', 'Eligibility', 'Attendance Percentage']);
+
+    // Add student data
+    for (var student in studentData) {
+      sheetObject.appendRow([
+        student['StudentName'],
+        student['StudentID'],
+        student['Eligibility'],
+        student['AttendancePercentage']
+      ]);
+    }
+
+    // Save the file
+    Directory? directory = await getExternalStorageDirectory();
+    String outputPath = "${directory?.path}/attendance.xlsx";
+    File(outputPath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(excel.save()!);
+
+    print('Attendance data exported to $outputPath');
   }
 
   @override
@@ -41,144 +135,122 @@ class _ClassViewAttendanceWidgetState extends State<ClassViewAttendanceWidget> {
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.menu, color: Colors.white), // Ensure menu button color is white
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => HomepageindexWidget()), // Navigate to MenuPage
-            );
-          },
-        ),
-      ),
-      body: Stack(
-        children: <Widget>[
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: Colors.white,
-          ),
-          ListView.builder(
-            padding: EdgeInsets.all(8.0),
-            itemCount: 3, // Number of placards
-            itemBuilder: (context, index) {
-              // Dummy data for demonstration
-              String studentName = 'Student ${index + 1}';
-              double attendancePercentage = (index == 0)
-                  ? 90.0
-                  : (index == 1)
-                  ? 80.0
-                  : 70.0;
-
-              Color startColor;
-              if (attendancePercentage > 85) {
-                startColor = Color(0xFF6FCF97);
-              } else if (attendancePercentage > 75) {
-                startColor = Colors.yellow;
-              } else {
-                startColor = Color(0xFFFF6F61);
-              }
-
-              return Container(
-                margin: EdgeInsets.symmetric(vertical: 10),
-                child: AnimatedContainer(
-                  duration: Duration(seconds: 1),
-                  curve: Curves.easeInOut,
-                  width: double.infinity,
-                  height: 95,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    gradient: LinearGradient(
-                      colors: [startColor, Color(0xFF3ABEF9)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 15.0),
-                        child: Text(
-                          studentName,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Poppins',
-                            fontSize: 24,
-                            letterSpacing: 0,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15.0),
-                        child: Text(
-                          '${attendancePercentage.toStringAsFixed(1)}%',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Poppins',
-                            fontSize: 24,
-                            letterSpacing: 0,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-          if (isMenuOpen)
-            BlurredBackground(
-              child: HomepageindexWidget(), // Replace with your actual MenuPage widget
-            ),
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: FloatingActionButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
-          child: Icon(Icons.arrow_back),
-          backgroundColor: Colors.blue,
         ),
       ),
-    );
-  }
-}
-
-class BlurredBackground extends StatelessWidget {
-  final Widget child;
-
-  const BlurredBackground({Key? key, required this.child}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.transparency,
-      child: Stack(
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Column(
         children: [
-          // Background blur effect
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              color: Colors.black.withOpacity(0.5), // Adjust opacity as needed
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.all(8.0),
+              itemCount: studentData.length,
+              itemBuilder: (context, index) {
+                String studentName = studentData[index]['StudentName'];
+                String studentID = studentData[index]['StudentID'];
+                String eligibility = studentData[index]['Eligibility'];
+                double attendancePercentage = studentData[index]['AttendancePercentage'];
+
+                Color startColor;
+                if (eligibility == 'Eligible') {
+                  startColor = Color(0xFF6FCF97);
+                } else if (eligibility == 'Not Eligible' && attendancePercentage >= 75) {
+                  startColor = Colors.amber;
+                } else {
+                  startColor = Color(0xFFFF6F61);
+                }
+
+                return Container(
+                  margin: EdgeInsets.symmetric(vertical: 10),
+                  child: AnimatedContainer(
+                    duration: Duration(seconds: 1),
+                    curve: Curves.easeInOut,
+                    width: double.infinity,
+                    height: 95,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      gradient: LinearGradient(
+                        colors: [startColor, Color(0xFF3ABEF9)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 15.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                studentName,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Poppins',
+                                  fontSize: 24,
+                                  letterSpacing: 0,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              ),
+                              Text(
+                                '$studentID | $eligibility',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  letterSpacing: 0,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 15.0),
+                          child: Text(
+                            '${attendancePercentage.toStringAsFixed(1)}%',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Poppins',
+                              fontSize: 24,
+                              letterSpacing: 0,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-          // Menu content
-          Center(
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.8, // Adjust the width as needed
-              padding: EdgeInsets.all(20.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10.0),
+          Container(
+            color: Color.fromRGBO(53, 114, 239, 1),
+            padding: EdgeInsets.all(20), // Increase padding to make it larger
+            child: GestureDetector(
+              onTap: () async {
+                await exportToExcel();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Attendance data exported successfully')),
+                );
+              },
+              child: Center(
+                child: Text(
+                  'PRINT ATTENDANCE',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14, // Slightly larger font size
+                    fontFamily: 'Poppins',
+                  ),
+                ),
               ),
-              child: child,
             ),
           ),
         ],

@@ -3,7 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Add this import
 import 'passwordreset.dart';  // Import the PasswordReset screen
-import 'homepage.dart';  // Import the Homepage screen
+import 'homepage_student.dart';  // Import the Homepage screen
 
 class StudentLoginWidget extends StatefulWidget {
   @override
@@ -21,8 +21,8 @@ class _StudentLoginWidgetState extends State<StudentLoginWidget> {
     try {
       // Retrieve the user's email and password from the Firestore collection
       final QuerySnapshot result = await _firestore
-          .collection('login_student')
-          .where('StudentEmail', isEqualTo: _emailController.text)
+          .collection('Student')
+          .where('CollegeEmail', isEqualTo: _emailController.text)
           .where('Password', isEqualTo: _passwordController.text)
           .get();
 
@@ -32,7 +32,7 @@ class _StudentLoginWidgetState extends State<StudentLoginWidget> {
         // Credentials are correct, navigate to the homepage
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => HomepageWidget()),
+          MaterialPageRoute(builder: (context) => StudenthomepageWidget()),
         );
       } else {
         // Show error message if credentials are incorrect
@@ -67,7 +67,7 @@ class _StudentLoginWidgetState extends State<StudentLoginWidget> {
         await _firebaseAuth.signInWithCredential(credential);
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => HomepageWidget()),
+          MaterialPageRoute(builder: (context) => StudenthomepageWidget()),
         );
       }
     } catch (e) {
