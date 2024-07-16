@@ -138,7 +138,11 @@ class _ClassaWidgetState extends State<ClassaWidget> {
                               () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => CieandseeWidget(),
+                                builder: (context) => CieandseeWidget(
+                                  classId: widget.classId,
+                                  teacherId: widget.teacherId,
+                                  subjectId: widget.subjectId,
+                                ),
                               ),
                             );
                           },
@@ -150,7 +154,11 @@ class _ClassaWidgetState extends State<ClassaWidget> {
                               () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => ClassMarksViewingWidget(),
+                                builder: (context) => ClassMarksViewingWidget(
+                                  classId: widget.classId,
+                                  teacherId: widget.teacherId,
+                                  subjectId: widget.subjectId,
+                                ),
                               ),
                             );
                           },

@@ -9,6 +9,7 @@ import 'menu.dart'; // Import the HomepageindexWidget file
 import 'homepage.dart'; // Import the Homepage file
 import 'profile.dart'; // Import the ProfileWidget file
 import 'homepage_student.dart';
+import 'cie1.dart'; // Import the Cie1 widget
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -40,7 +41,9 @@ class MyApp extends StatelessWidget {
         '/homepage': (context) => HomepageWidget(teacherid: '_teacheridController.text'),
         '/menu': (context) => HomepageindexWidget(),
         '/profile': (context) => ProfileWidget(), // Add this route
-        '/homepage_student': (context) => StudenthomepageWidget() // Add this route
+        '/homepage_student': (context) => StudenthomepageWidget(), // Add this route
+
+
 
       },
     );
