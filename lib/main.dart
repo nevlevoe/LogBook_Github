@@ -37,11 +37,11 @@ class MyApp extends StatelessWidget {
         '/login_option': (context) => TeacherStudentLoginWidget(),
         '/passwordreset': (context) => PasswordresetWidget(),
         '/overlaypasswordreset': (context) => Frame2610316Widget(),
-        '/homepageindex': (context) => HomepageindexWidget(),
+        '/homepageindex': (context) => HomepageindexWidget(teacherId: ''),
         '/homepage': (context) => HomepageWidget(teacherid: '_teacheridController.text'),
-        '/menu': (context) => HomepageindexWidget(),
-        '/profile': (context) => ProfileWidget(), // Add this route
-        '/homepage_student': (context) => StudenthomepageWidget(), // Add this route
+        '/menu': (context) => HomepageindexWidget(teacherId: ''),
+        '/profile': (context) => ProfileWidget(teacherId: ''), // Add this route
+        '/homepage_student': (context) => StudentHomeWidget(studentusn: '',), // Add this route
 
 
 

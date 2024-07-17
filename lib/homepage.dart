@@ -39,7 +39,9 @@ class _HomepageWidgetState extends State<HomepageWidget> {
       builder: (BuildContext context) {
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: HomepageindexWidget(),
+          child: HomepageindexWidget(
+            teacherId: widget.teacherid,
+          ),
         );
       },
     ).then((value) {

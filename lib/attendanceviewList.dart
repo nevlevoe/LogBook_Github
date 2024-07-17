@@ -92,7 +92,7 @@ class _ClassViewAttendanceWidgetState extends State<ClassViewAttendanceWidget> {
     Sheet sheetObject = excel['Sheet1'];
 
     // Add column headers
-    sheetObject.appendRow(['Student Name', 'Student ID', 'Eligibility', 'Attendance Percentage']);
+    //sheetObject.appendRow(['Student Name', 'Student ID', 'Eligibility', 'Attendance Percentage']);
 
     // Add student data
     for (var student in studentData) {

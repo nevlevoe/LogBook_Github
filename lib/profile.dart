@@ -1,11 +1,101 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'menu.dart'; // Ensure you import the HomepageWidget
 
 class ProfileWidget extends StatefulWidget {
+  final String teacherId;
+
+  ProfileWidget({
+    required this.teacherId,
+  });
+
   @override
   _ProfileWidgetState createState() => _ProfileWidgetState();
 }
 
 class _ProfileWidgetState extends State<ProfileWidget> {
+  String teacherFname = '';
+  String teacherLname = '';
+  String departmentName = '';
+  int classesHandled = 0;
+  int coursesHandled = 0;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    try {
+      // Fetch teacher data
+      DocumentSnapshot teacherSnapshot = await FirebaseFirestore.instance
+          .collection('Teacher')
+          .doc(widget.teacherId)
+          .get();
+
+      if (teacherSnapshot.exists) {
+        var teacherData = teacherSnapshot.data() as Map<String, dynamic>;
+        String departmentId = teacherData['DepartmentID'];
+
+        print('Teacher Data: $teacherData');
+
+        setState(() {
+          teacherFname = teacherData['TeacherFname'];
+          teacherLname = teacherData['TeacherLname'];
+        });
+
+        // Fetch department data
+        DocumentSnapshot departmentSnapshot = await FirebaseFirestore.instance
+            .collection('Department')
+            .doc(departmentId)
+            .get();
+
+        if (departmentSnapshot.exists) {
+          var departmentData =
+          departmentSnapshot.data() as Map<String, dynamic>;
+
+          print('Department Data: $departmentData');
+
+          setState(() {
+            departmentName = departmentData['DepartmentName'];
+          });
+        }
+      }
+
+      // Fetch classes handled count
+      QuerySnapshot classesSnapshot = await FirebaseFirestore.instance
+          .collection('Classes')
+          .where('TeacherID', isEqualTo: widget.teacherId)
+          .get();
+
+      print('Classes Handled: ${classesSnapshot.docs.length}');
+
+      setState(() {
+        classesHandled = classesSnapshot.docs.length;
+      });
+
+      // Fetch courses handled count
+      QuerySnapshot coursesSnapshot = await FirebaseFirestore.instance
+          .collection('FacultyHandling')
+          .where('TeacherID', isEqualTo: widget.teacherId)
+          .get();
+
+      print('Courses Handled: ${coursesSnapshot.docs.length}');
+
+      setState(() {
+        coursesHandled = coursesSnapshot.docs.length;
+      });
+    } catch (e) {
+      print('Error fetching data: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Get the screen dimensions
@@ -13,7 +103,9 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      body: Container(
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Container(
         width: screenWidth,
         height: screenHeight,
         decoration: BoxDecoration(
@@ -22,7 +114,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
               color: Color.fromRGBO(0, 0, 0, 0.25),
               offset: Offset(0, 4),
               blurRadius: 4,
-            )
+            ),
           ],
           color: Color.fromRGBO(255, 255, 255, 1),
         ),
@@ -45,7 +137,14 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                         color: Colors.white,
                       ),
                       onPressed: () {
-                        Navigator.pushNamed(context, '/homepageindex'); // Navigate to menu.dart
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomepageindexWidget(
+                              teacherId: widget.teacherId,
+                            ),
+                          ),
+                        );
                       },
                     ),
                     Expanded(
@@ -75,7 +174,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'Dr. John Doe', // Teacher's name
+                    '$teacherFname $teacherLname', // Teacher's name
                     style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
@@ -83,7 +182,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    'Senior Lecturer', // Teacher's designation
+                    departmentName, // Teacher's department name
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.normal,
@@ -110,7 +209,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                               ),
                               SizedBox(height: 10),
                               Text(
-                                '5', // Number of courses handled
+                                '$coursesHandled', // Number of courses handled
                                 style: TextStyle(
                                   fontSize: 16,
                                 ),
@@ -138,7 +237,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                               ),
                               SizedBox(height: 10),
                               Text(
-                                '20', // Number of classes handled
+                                '$classesHandled', // Number of classes handled
                                 style: TextStyle(
                                   fontSize: 16,
                                 ),
