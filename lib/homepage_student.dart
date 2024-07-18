@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
+import 'student_view_marks.dart';
+import 'student_view_attendance.dart';
 
 class StudentHomeWidget extends StatefulWidget {
   final String studentusn;
@@ -7,19 +10,51 @@ class StudentHomeWidget extends StatefulWidget {
   StudentHomeWidget({
     required this.studentusn,
   });
+
   @override
   _StudentHomeWidgetState createState() => _StudentHomeWidgetState();
 }
 
 class _StudentHomeWidgetState extends State<StudentHomeWidget> {
+  String studentName = 'Loading...';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStudentName();
+  }
+
+  Future<void> _fetchStudentName() async {
+    try {
+      QuerySnapshot studentDocs = await FirebaseFirestore.instance
+          .collection('Student')
+          .where('CollegeEmail', isEqualTo: widget.studentusn)
+          .get();
+
+      if (studentDocs.docs.isNotEmpty) {
+        setState(() {
+          studentName = studentDocs.docs[0]['Fname'];
+        });
+      } else {
+        setState(() {
+          studentName = 'Not Found';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        studentName = 'Error';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Container(
-          width: 360,
-          height: 800,
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
             color: Colors.white,
           ),
@@ -29,7 +64,7 @@ class _StudentHomeWidgetState extends State<StudentHomeWidget> {
                 top: 0,
                 left: 0,
                 child: Container(
-                  width: 360,
+                  width: MediaQuery.of(context).size.width,
                   height: 70,
                   decoration: BoxDecoration(
                     color: Color.fromRGBO(53, 114, 239, 1),
@@ -71,7 +106,7 @@ class _StudentHomeWidgetState extends State<StudentHomeWidget> {
                 top: 16,
                 left: 75,
                 child: Text(
-                  'MONISH',
+                  studentName,
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     color: Color.fromRGBO(255, 153, 0, 1),
@@ -87,10 +122,14 @@ class _StudentHomeWidgetState extends State<StudentHomeWidget> {
                 left: 10,
                 child: GestureDetector(
                   onTap: () {
-                    // Add navigation to view CIE marks page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => StudentviewmarksWidget()),
+                    );
                   },
                   child: Container(
-                    width: 339,
+                    width: MediaQuery.of(context).size.width - 20,
                     height: 63,
                     decoration: BoxDecoration(
                       color: Color.fromRGBO(255, 153, 0, 1),
@@ -119,13 +158,6 @@ class _StudentHomeWidgetState extends State<StudentHomeWidget> {
                   width: 79,
                   height: 59,
                   decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color.fromRGBO(0, 0, 0, 0.25),
-                        offset: Offset(0, 4),
-                        blurRadius: 4,
-                      ),
-                    ],
                     image: DecorationImage(
                       image: AssetImage('assets/Pngtreeschoolmaterialsclipartcartoon_132473861.png'),
                       fit: BoxFit.fitWidth,
@@ -138,10 +170,14 @@ class _StudentHomeWidgetState extends State<StudentHomeWidget> {
                 left: 10,
                 child: GestureDetector(
                   onTap: () {
-                    // Add navigation to view attendance page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => StudentviewattendanceWidget()),
+                    );
                   },
                   child: Container(
-                    width: 339,
+                    width: MediaQuery.of(context).size.width - 20,
                     height: 63,
                     decoration: BoxDecoration(
                       color: Color.fromRGBO(53, 114, 239, 1),
@@ -170,13 +206,6 @@ class _StudentHomeWidgetState extends State<StudentHomeWidget> {
                   width: 79,
                   height: 59,
                   decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color.fromRGBO(0, 0, 0, 0.25),
-                        offset: Offset(0, 4),
-                        blurRadius: 4,
-                      ),
-                    ],
                     image: DecorationImage(
                       image: AssetImage('assets/Pngtreenotebookandpencil3d_68616221.png'),
                       fit: BoxFit.fitWidth,

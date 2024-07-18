@@ -144,7 +144,7 @@ class _CieandseeWidgetState extends State<CieandseeWidget> {
       ),
       body: Center(
         child: GridView.count(
-          crossAxisCount: 3, // Number of items per row
+          crossAxisCount: 2, // Number of items per row
           crossAxisSpacing: 20.0, // Increased horizontal spacing
           mainAxisSpacing: 20.0, // Increased vertical spacing
           padding: EdgeInsets.all(16.0),
