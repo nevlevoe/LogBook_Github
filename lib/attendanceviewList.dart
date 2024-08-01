@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ClassViewAttendanceWidget extends StatefulWidget {
   final String classId;
@@ -27,7 +28,15 @@ class _ClassViewAttendanceWidgetState extends State<ClassViewAttendanceWidget> {
   @override
   void initState() {
     super.initState();
+    requestPermissions();
     fetchStudentData();
+  }
+
+  Future<void> requestPermissions() async {
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      await Permission.storage.request();
+    }
   }
 
   Future<void> fetchStudentData() async {
@@ -87,32 +96,53 @@ class _ClassViewAttendanceWidgetState extends State<ClassViewAttendanceWidget> {
     }
   }
 
-  Future<void> exportToExcel() async {
+  /*Future<void> exportToExcel() async {
     var excel = Excel.createExcel();
     Sheet sheetObject = excel['Sheet1'];
 
     // Add column headers
-    //sheetObject.appendRow(['Student Name', 'Student ID', 'Eligibility', 'Attendance Percentage']);
+    sheetObject.appendRow([
+      CellValue.value('Student Name'),
+      CellValue.value('Student ID'),
+      CellValue.value('Percentage'),
+      CellValue.value('Eligibility'),
+    ]);
 
     // Add student data
     for (var student in studentData) {
       sheetObject.appendRow([
-        student['StudentName'],
-        student['StudentID'],
-        student['Eligibility'],
-        student['AttendancePercentage']
+        CellValue.value(student['StudentName']),
+        CellValue.value(student['StudentID']),
+        CellValue.value(student['AttendancePercentage'].toString()),
+        CellValue.value(student['Eligibility']),
       ]);
     }
 
     // Save the file
-    Directory? directory = await getExternalStorageDirectory();
-    String outputPath = "${directory?.path}/attendance.xlsx";
-    File(outputPath)
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(excel.save()!);
-
-    print('Attendance data exported to $outputPath');
-  }
+    try {
+      Directory? directory = await getExternalStorageDirectory();
+      if (directory != null) {
+        String outputPath = "${directory.path}/attendance.xlsx";
+        File(outputPath)
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(excel.save()!);
+        print('Attendance data exported to $outputPath');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Attendance data exported successfully to $outputPath')),
+        );
+      } else {
+        print('Failed to get external storage directory');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to get external storage directory')),
+        );
+      }
+    } catch (e) {
+      print('Error exporting data: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error exporting data')),
+      );
+    }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -236,10 +266,7 @@ class _ClassViewAttendanceWidgetState extends State<ClassViewAttendanceWidget> {
             padding: EdgeInsets.all(20), // Increase padding to make it larger
             child: GestureDetector(
               onTap: () async {
-                await exportToExcel();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Attendance data exported successfully')),
-                );
+                //await exportToExcel();
               },
               child: Center(
                 child: Text(

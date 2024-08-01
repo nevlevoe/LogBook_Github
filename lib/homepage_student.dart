@@ -26,24 +26,31 @@ class _StudentHomeWidgetState extends State<StudentHomeWidget> {
 
   Future<void> _fetchStudentName() async {
     try {
+      print("Fetching student name for USN: ${widget.studentusn}");
+
       QuerySnapshot studentDocs = await FirebaseFirestore.instance
           .collection('Student')
-          .where('CollegeEmail', isEqualTo: widget.studentusn)
+          .where('StudentUSN', isEqualTo: widget.studentusn)
           .get();
+
+      print("Query completed with ${studentDocs.docs.length} documents found.");
 
       if (studentDocs.docs.isNotEmpty) {
         setState(() {
           studentName = studentDocs.docs[0]['Fname'];
         });
+        print("Student name found: $studentName");
       } else {
         setState(() {
           studentName = 'Not Found';
         });
+        print("No matching student found.");
       }
     } catch (e) {
       setState(() {
         studentName = 'Error';
       });
+      print("Error fetching student name: $e");
     }
   }
 
@@ -69,51 +76,49 @@ class _StudentHomeWidgetState extends State<StudentHomeWidget> {
                   decoration: BoxDecoration(
                     color: Color.fromRGBO(53, 114, 239, 1),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: 19, top: 16.25),
-                        child: Transform.rotate(
-                          angle: 0.2591028889488524 * (math.pi / 180),
-                          child: Text(
-                            'Hello',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Poppins',
-                              fontSize: 20,
-                              fontWeight: FontWeight.normal,
-                              height: 1,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 16, right: 16, top: 16.25),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Transform.rotate(
+                              angle: 0.2591028889488524 * (math.pi / 180),
+                              child: Text(
+                                'Hello',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Poppins',
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.normal,
+                                  height: 1,
+                                ),
+                              ),
                             ),
-                          ),
+                            SizedBox(width: 10), // Space between 'Hello' and studentName
+                            Text(
+                              studentName,
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                color: Color.fromRGBO(255, 153, 0, 1),
+                                fontFamily: 'Poppins',
+                                fontSize: 20,
+                                fontWeight: FontWeight.normal,
+                                height: 1,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(right: 20, top: 16.25),
-                        child: GestureDetector(
+                        GestureDetector(
                           onTap: () {
-                            // Add logout functionality here
+                            Navigator.pop(context);
                           },
                           child: Icon(Icons.logout, color: Colors.white),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 16,
-                left: 75,
-                child: Text(
-                  studentName,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    color: Color.fromRGBO(255, 153, 0, 1),
-                    fontFamily: 'Poppins',
-                    fontSize: 20,
-                    fontWeight: FontWeight.normal,
-                    height: 1,
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -125,7 +130,7 @@ class _StudentHomeWidgetState extends State<StudentHomeWidget> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => StudentviewmarksWidget()),
+                          builder: (context) => StudentviewmarksWidget(studentusn: widget.studentusn,)),
                     );
                   },
                   child: Container(
@@ -153,7 +158,7 @@ class _StudentHomeWidgetState extends State<StudentHomeWidget> {
               ),
               Positioned(
                 top: 87,
-                left: 260,
+                left: 310,  // Adjusted from 290 to 310
                 child: Container(
                   width: 79,
                   height: 59,
@@ -173,7 +178,7 @@ class _StudentHomeWidgetState extends State<StudentHomeWidget> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => StudentviewattendanceWidget()),
+                          builder: (context) => StudentviewattendanceWidget(studentusn: widget.studentusn,)),
                     );
                   },
                   child: Container(
@@ -201,7 +206,7 @@ class _StudentHomeWidgetState extends State<StudentHomeWidget> {
               ),
               Positioned(
                 top: 163,
-                left: 260,
+                left: 310,  // Adjusted from 290 to 310
                 child: Container(
                   width: 79,
                   height: 59,
