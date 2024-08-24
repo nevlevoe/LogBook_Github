@@ -5,6 +5,9 @@ import 'package:excel/excel.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:path/path.dart' as p;
+import 'package:open_filex/open_filex.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ClassViewAttendanceWidget extends StatefulWidget {
   final String classId;
@@ -143,6 +146,47 @@ class _ClassViewAttendanceWidgetState extends State<ClassViewAttendanceWidget> {
       );
     }
   }*/
+  Future<void> exportToExcel(List<Map<String, dynamic>> fetchedData) async {
+    // Request permission at runtime
+    if (await Permission.storage.request().isGranted) {
+      Excel excel = Excel.createExcel();
+      excel.rename(excel.getDefaultSheet()!, "Attendance");
+
+      Sheet sheet = excel["Attendance"];
+
+      var cell1 = sheet.cell(CellIndex.indexByString('A1'));
+      cell1.value = TextCellValue('USN');
+      var cell2 = sheet.cell(CellIndex.indexByString('B1'));
+      cell2.value = TextCellValue('Name');
+      var cell3 = sheet.cell(CellIndex.indexByString('C1'));
+      cell3.value = TextCellValue('Percentage');
+      var cell4 = sheet.cell(CellIndex.indexByString('D1'));
+      cell4.value = TextCellValue('Eligibility');
+
+      for (int i = 0; i < fetchedData.length; i++) {
+        var student = fetchedData[i];
+        sheet.cell(CellIndex.indexByString('A${i + 2}')).value = TextCellValue(student['StudentID']);
+        sheet.cell(CellIndex.indexByString('B${i + 2}')).value = TextCellValue(student['StudentName']);
+        sheet.cell(CellIndex.indexByString('C${i + 2}')).value = TextCellValue(student['AttendancePercentage'].toString());
+        sheet.cell(CellIndex.indexByString('D${i + 2}')).value = TextCellValue(student['Eligibility']);
+      }
+
+
+      var fileBytes = excel.save();
+      var directory = await getApplicationDocumentsDirectory();
+      print('Directory path: ${directory.path}');
+      String directoryPath = directory.path + '/output_file_name.xlsx';
+
+      File(directoryPath)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(fileBytes!);
+      print('file was probably saved');
+      OpenFilex.open(directoryPath);
+      print('file should open');
+    } else {
+      print('Permission denied');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -266,7 +310,7 @@ class _ClassViewAttendanceWidgetState extends State<ClassViewAttendanceWidget> {
             padding: EdgeInsets.all(20), // Increase padding to make it larger
             child: GestureDetector(
               onTap: () async {
-                //await exportToExcel();
+                await exportToExcel(studentData);
               },
               child: Center(
                 child: Text(

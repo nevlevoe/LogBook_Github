@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'menu.dart'; // Ensure you import the HomepageWidget
+import 'menu.dart';
 
 class ProfileWidget extends StatefulWidget {
   final String teacherId;
@@ -20,44 +20,68 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   int classesHandled = 0;
   int coursesHandled = 0;
   bool isLoading = true;
+  bool _isDisposed = false; // To track if the widget is disposed
 
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    _fetchData(widget.teacherId);
   }
 
-  Future<void> _fetchData() async {
+  @override
+  void dispose() {
+    _isDisposed = true; // Mark widget as disposed
+    super.dispose();
+  }
+
+  Future<void> _fetchData(String teacherId) async {
     try {
       // Fetch teacher data
-      DocumentSnapshot teacherSnapshot = await FirebaseFirestore.instance
+      print('$teacherId');
+      QuerySnapshot teacherQuerySnapshot = await FirebaseFirestore.instance
           .collection('Teacher')
-          .doc(widget.teacherId)
+          .where('TeacherID', isEqualTo: teacherId)
           .get();
 
-      if (teacherSnapshot.exists) {
-        var teacherData = teacherSnapshot.data() as Map<String, dynamic>;
-        String departmentId = teacherData['DepartmentID'];
+      if (_isDisposed) return; // Exit if widget is disposed
 
-        print('Teacher Data: $teacherData');
+      // Loop through all the documents in the Teacher collection that match the teacherId
+      if (teacherQuerySnapshot.docs.isNotEmpty) {
+        for (QueryDocumentSnapshot doc in teacherQuerySnapshot.docs) {
+          var teacherData = doc.data() as Map<String, dynamic>;
 
-        setState(() {
-          teacherFname = teacherData['TeacherFname'];
-          teacherLname = teacherData['TeacherLname'];
-        });
+          print('Teacher Data: $teacherData');
 
-        // Fetch department data
-        DocumentSnapshot departmentSnapshot = await FirebaseFirestore.instance
-            .collection('Department')
-            .doc(departmentId)
-            .get();
+          String teacherFname = teacherData['TeacherFname'];
+          String teacherLname = teacherData['TeacherLname'];
 
-        if (departmentSnapshot.exists) {
-          var departmentData =
-          departmentSnapshot.data() as Map<String, dynamic>;
+          print('Teacher First Name: $teacherFname');
+          print('Teacher Last Name: $teacherLname');
 
-          print('Department Data: $departmentData');
+          if (mounted) {
+            setState(() {
+              this.teacherFname = teacherFname;
+              this.teacherLname = teacherLname;
+            });
+          }
+        }
+      }
 
+      // Fetch department data (if needed)
+      DocumentSnapshot departmentSnapshot = await FirebaseFirestore.instance
+          .collection('Department')
+          .doc(teacherQuerySnapshot.docs.first['DepartmentID'])
+          .get();
+
+      if (_isDisposed) return; // Exit if widget is disposed
+
+      if (departmentSnapshot.exists) {
+        var departmentData =
+        departmentSnapshot.data() as Map<String, dynamic>;
+
+        print('Department Data: $departmentData');
+
+        if (mounted) {
           setState(() {
             departmentName = departmentData['DepartmentName'];
           });
@@ -70,11 +94,15 @@ class _ProfileWidgetState extends State<ProfileWidget> {
           .where('TeacherID', isEqualTo: widget.teacherId)
           .get();
 
+      if (_isDisposed) return; // Exit if widget is disposed
+
       print('Classes Handled: ${classesSnapshot.docs.length}');
 
-      setState(() {
-        classesHandled = classesSnapshot.docs.length;
-      });
+      if (mounted) {
+        setState(() {
+          classesHandled = classesSnapshot.docs.length;
+        });
+      }
 
       // Fetch courses handled count
       QuerySnapshot coursesSnapshot = await FirebaseFirestore.instance
@@ -82,19 +110,28 @@ class _ProfileWidgetState extends State<ProfileWidget> {
           .where('TeacherID', isEqualTo: widget.teacherId)
           .get();
 
+      if (_isDisposed) return; // Exit if widget is disposed
+
       print('Courses Handled: ${coursesSnapshot.docs.length}');
 
-      setState(() {
-        coursesHandled = coursesSnapshot.docs.length;
-      });
+      if (mounted) {
+        setState(() {
+          coursesHandled = coursesSnapshot.docs.length;
+        });
+      }
     } catch (e) {
       print('Error fetching data: $e');
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (_isDisposed) return; // Exit if widget is disposed
+
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -140,9 +177,10 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => HomepageindexWidget(
-                              teacherId: widget.teacherId,
-                            ),
+                            builder: (context) =>
+                                HomepageindexWidget(
+                                  teacherId: widget.teacherId,
+                                ),
                           ),
                         );
                       },

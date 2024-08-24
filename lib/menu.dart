@@ -6,12 +6,12 @@ import 'homepage.dart';
 import 'login.dart';
 
 class HomepageindexWidget extends StatefulWidget {
-final String teacherId;
+  final String teacherId;
 
-HomepageindexWidget({required this.teacherId});
+  HomepageindexWidget({required this.teacherId});
 
-@override
-_HomepageindexWidgetState createState() => _HomepageindexWidgetState();
+  @override
+  _HomepageindexWidgetState createState() => _HomepageindexWidgetState();
 }
 
 class _HomepageindexWidgetState extends State<HomepageindexWidget> {
@@ -35,7 +35,9 @@ class _HomepageindexWidgetState extends State<HomepageindexWidget> {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => HomepageWidget(teacherid: widget.teacherId,)),
+          MaterialPageRoute(
+            builder: (context) => HomepageWidget(teacherid: widget.teacherId),
+          ),
         );
       },
       child: Scaffold(
@@ -53,20 +55,14 @@ class _HomepageindexWidgetState extends State<HomepageindexWidget> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                insetPadding: EdgeInsets.only(left: 0, right: MediaQuery.of(context).size.width * 0.2),
+                insetPadding: EdgeInsets.only(
+                    left: 0, right: MediaQuery.of(context).size.width * 0.2),
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.8,
                   height: MediaQuery.of(context).size.height,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color.fromRGBO(0, 0, 0, 0.25),
-                        offset: Offset(0, 4),
-                        blurRadius: 4,
-                      )
-                    ],
                   ),
                   child: GestureDetector(
                     onTap: () {},
@@ -80,7 +76,8 @@ class _HomepageindexWidgetState extends State<HomepageindexWidget> {
                             height: 70,
                             decoration: BoxDecoration(
                               color: Color.fromRGBO(53, 114, 239, 1),
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                              borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(20)),
                             ),
                             child: Center(
                               child: Text(
@@ -108,19 +105,19 @@ class _HomepageindexWidgetState extends State<HomepageindexWidget> {
                                 _buildMenuLink(
                                   context,
                                   'Home',
-                                  HomepageWidget(teacherid: widget.teacherId,),
+                                  HomepageWidget(teacherid: widget.teacherId),
                                   _activeButton == 'HomepageWidget',
                                 ),
                                 _buildMenuLink(
                                   context,
                                   'Profile',
-                                  ProfileWidget(teacherId: widget.teacherId, ),
+                                  ProfileWidget(teacherId: widget.teacherId),
                                   _activeButton == 'ProfileWidget',
                                 ),
                                 _buildMenuLink(
                                   context,
                                   'Calendar of Events',
-                                  CoeWidget(teacherId: widget.teacherId,),
+                                  CoeWidget(teacherId: widget.teacherId),
                                   _activeButton == 'CoeWidget',
                                 ),
                                 _buildMenuLink(
@@ -161,18 +158,14 @@ class _HomepageindexWidgetState extends State<HomepageindexWidget> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              offset: Offset(0, 2),
-              blurRadius: 2,
-            ),
-          ],
+          // Removed the boxShadow to eliminate the shadow effect
         ),
         child: Text(
           title,
           style: TextStyle(
-            color: isActive ? Colors.yellow : (isLogout ? Colors.red : Colors.black),
+            color: isActive
+                ? Colors.yellow
+                : (isLogout ? Colors.red : Colors.black),
             fontFamily: 'DM Sans',
             fontSize: 20,
             fontWeight: FontWeight.normal,
