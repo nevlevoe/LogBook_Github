@@ -76,7 +76,7 @@ class _ClassViewAttendanceWidgetState extends State<ClassViewAttendanceWidget> {
             'StudentName': studentData['Fname'],
             'StudentID': attendanceData['StudentID'],
             'Eligibility': attendanceData['Eligibility'],
-            'AttendancePercentage': attendanceData['AttendancePercentage'],
+            'AttendancePercentage': (attendanceData['AttendancePercentage'] as num).toDouble(),
           });
         } else {
           print('StudentID: ${attendanceData['StudentID']} does not exist.');
@@ -227,7 +227,7 @@ class _ClassViewAttendanceWidgetState extends State<ClassViewAttendanceWidget> {
                 String studentName = studentData[index]['StudentName'];
                 String studentID = studentData[index]['StudentID'];
                 String eligibility = studentData[index]['Eligibility'];
-                double attendancePercentage = studentData[index]['AttendancePercentage'];
+                double attendancePercentage = (studentData[index]['AttendancePercentage'] as num).toDouble();
 
                 Color startColor;
                 if (eligibility == 'Eligible') {

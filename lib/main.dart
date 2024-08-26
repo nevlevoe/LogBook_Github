@@ -13,13 +13,21 @@ import 'cie1.dart'; // Import the Cie1 widget
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:dcdg/dcdg.dart';
+import '_add_data.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  //await Service().addStudent();
+  /*await Service().addStudentMarks();
+  await Service().addSubjectAttendance();*/
 
+  /*await Service().addSubjectDetails();
+  await Service().addClass();*/
+
+  //await Service().addTeacher();
   runApp(MyApp());
 }
 
@@ -69,47 +77,50 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment(0.19, -0.98),
-          end: Alignment(-0.19, 0.98),
-          colors: [
-            Color(0xFF3ABEF9),
-            Color(0xFF3572EF),
-          ],
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment(0.19, -0.98),
+            end: Alignment(-0.19, 0.98),
+            colors: [
+              Color(0xFF3ABEF9),
+              Color(0xFF3572EF),
+            ],
+          ),
         ),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Container(
-              width: 150,
-              height: 153,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/bmslogo.png'),
-                  fit: BoxFit.fill,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                width: 150,
+                height: 153,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/bmslogo.png'),
+                    fit: BoxFit.fill,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 0),
-            const Text(
-              'LogBook',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 50,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.w700,
-                height: 1.2,
-                letterSpacing: -0.85,
+              const SizedBox(height: 20),
+              const Text(
+                'LogBook',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 50,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.2,
+                  letterSpacing: 1,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

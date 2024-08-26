@@ -117,7 +117,7 @@ class _HomepageWidgetState extends State<HomepageWidget> {
                   right: 0,
                   child: Container(
                     width: double.infinity,
-                    height: 70,
+                    height: 90,
                     decoration: BoxDecoration(
                       color: Color.fromRGBO(53, 114, 239, 1),
                     ),

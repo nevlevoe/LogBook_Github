@@ -125,58 +125,62 @@ class _PracticalsState extends State<Practicals> {
               top: 90,
               left: 20,
               right: 20,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: _students.map((student) {
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            student['studentName'],
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Poppins',
-                              fontSize: 20,
+              bottom: 80,  // Adjusted bottom position to ensure scrollbar and submit button are visible
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: _students.map((student) {
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.orange,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              student['studentName'],
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Poppins',
+                                fontSize: 20,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            student['studentID'],
-                            style: TextStyle(
-                              color: Color.fromRGBO(5, 12, 156, 1),
-                              fontFamily: 'Poppins',
-                              fontSize: 12,
+                            SizedBox(height: 4),
+                            Text(
+                              student['studentID'],
+                              style: TextStyle(
+                                color: Color.fromRGBO(5, 12, 156, 1),
+                                fontFamily: 'Poppins',
+                                fontSize: 12,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 16),
-                          TextField(
-                            controller: student['controller'],
-                            keyboardType: TextInputType.number,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                            ],
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(4),
-                                borderSide: BorderSide(
-                                  color: Color.fromRGBO(227, 232, 238, 1),
+                            SizedBox(height: 16),
+                            TextField(
+                              controller: student['controller'],
+                              keyboardType: TextInputType.number,
+                              inputFormatters: <TextInputFormatter>[
+                                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                              ],
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                  borderSide: BorderSide(
+                                    color: Color.fromRGBO(227, 232, 238, 1),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             ),

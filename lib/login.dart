@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'passwordreset.dart';  // Import the PasswordReset screen
 import 'homepage.dart';  // Import the Homepage screen
+import 'login_option.dart'; // Import the TeacherStudentLoginWidget
 
 class LoginWidget extends StatefulWidget {
   @override
@@ -15,7 +15,6 @@ class _LoginWidgetState extends State<LoginWidget> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _teacheridController = TextEditingController();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   void _login() async {
     try {
@@ -58,43 +57,8 @@ class _LoginWidgetState extends State<LoginWidget> {
     );
   }
 
-  Future<void> _signInWithGoogle() async {
-    try {
-      final GoogleSignIn _googleSignIn = GoogleSignIn(
-        clientId: '546715749052-surimq7lh7f4k2t54ijum88vt8gf5jh3.apps.googleusercontent.com',  // Replace with your actual client ID
-      );
-      final GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
-      if (googleSignInAccount != null) {
-        final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          idToken: googleSignInAuthentication.idToken,
-          accessToken: googleSignInAuthentication.accessToken,
-        );
-        await _firebaseAuth.signInWithCredential(credential);
-
-        // Fetch the TeacherID from Firestore
-        FirebaseFirestore firestore = FirebaseFirestore.instance;
-        QuerySnapshot snapshot = await firestore
-            .collection('Teacher')
-            .where('CollegeEmail', isEqualTo: _emailController.text)
-            .get();
-
-        if (snapshot.docs.isNotEmpty) {
-          String teacherId = snapshot.docs.first.get('TeacherID');
-          _teacheridController.text = teacherId;
-
-          // Navigate to the Homepage
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => HomepageWidget(teacherid: _teacheridController.text)),
-          );
-        }
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error signing in with Google: $e')),
-      );
-    }
+  void _navigateToTeacherStudentLogin(BuildContext context) {
+    Navigator.pushNamed(context, '/login_option');
   }
 
   @override
@@ -258,11 +222,11 @@ class _LoginWidgetState extends State<LoginWidget> {
               ),
             ),
             Positioned(
-              top: 700,
+              top: 700, // Adjust this as needed
               left: 20,
               right: 20,
               child: GestureDetector(
-                onTap: _signInWithGoogle,
+                onTap: () => _navigateToTeacherStudentLogin(context),
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
@@ -273,12 +237,12 @@ class _LoginWidgetState extends State<LoginWidget> {
                         blurRadius: 20,
                       )
                     ],
-                    color: Colors.red, // Google's primary color
+                    color: Color.fromRGBO(53, 114, 239, 1),
                   ),
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                   child: Center(
                     child: Text(
-                      'Sign in with Google',
+                      'BACK TO MAIN PAGE',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
